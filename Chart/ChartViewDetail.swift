@@ -13,7 +13,9 @@ struct ChartViewDetail: View {
     @ObservedObject var model : VirusTrackerViewModel
     let name: String
     @State var index = 0
-    @State var lineGraph: Bool = true
+    @State var graph = 0
+    @State private var xValue: Double = 0
+    @State var v = 0
         
     var body: some View {
         GeometryReader { p in
@@ -71,7 +73,7 @@ struct ChartViewDetail: View {
                 }
                 Spacer()
                 HStack {
-                    Text(self.model.startDate)
+                    Text(self.model.virusTrackerDataSet.count > 0 ? self.model.virusTrackerDataSet[Int(self.xValue)].date : "")
                         .font(.footnote)
                         .padding(.leading)
                     Spacer()
@@ -79,13 +81,18 @@ struct ChartViewDetail: View {
                         .font(.footnote)
                         .padding(.trailing)
                 }
-                if self.lineGraph {
-                    LineChartSwiftUI(nydata: self.model.virusTrackerDataSet, index: self.index)
-                        .frame(width: p.size.width, height: p.size.height-80, alignment: .center)
+                if self.graph == 0 {
+                    LineChartSwiftUI(nydata: self.model.virusTrackerDataSet, index: self.index, start: Int(self.xValue))
+                        .frame(width: p.size.width, height: p.size.height-150, alignment: .center)
+                } else if self.graph == 1 {
+                    BarChartSwiftUI(nydata: self.model.virusTrackerDataSet, index: self.index, start: Int(self.xValue))
+                        .frame(width: p.size.width, height: p.size.height-150, alignment: .center)
                 } else {
-                    BarChartSwiftUI(nydata: self.model.virusTrackerDataSet, index: self.index)
-                        .frame(width: p.size.width, height: p.size.height-80, alignment: .center)
+                    LineChartSwiftUI(nydata: self.model.virusTrackerDataSet, index: self.newOrNot() ? 5 : 4, start: Int(self.xValue))
+                        .frame(width: p.size.width, height: p.size.height-150, alignment: .center)
                 }
+                Slider(value: self.$xValue, in: 0...Double(self.model.virusTrackerDataSet.count > 0 ? self.model.virusTrackerDataSet.count - 1 : 0 ))
+                    .padding()
 /*
                 PieChart(pieChartData: PieChartData(data: self.model.countryMaxCases, state: "US"))
                     .frame(width: p.size.width * 0.8, height: p.size.width * 0.8)
@@ -106,14 +113,21 @@ struct ChartViewDetail: View {
                     Spacer()
                     }
                     Button(action: {
-                        self.lineGraph.toggle()
+                        self.graph += 1
+                        if self.graph > 2 {
+                            self.graph = 0
+                        }
                     }) {
-                        if self.lineGraph {
+                        if self.graph == 0 {
                             Image("linegraph")
                                 .resizable()
                         }
-                        else {
+                        else if self.graph == 1 {
                             Image("bargraph")
+                                .resizable()
+                        }
+                        else {
+                            Image("doubleGraph")
                                 .resizable()
                         }
                     }
@@ -121,12 +135,24 @@ struct ChartViewDetail: View {
             )
         }
     }
+    
+    func newOrNot()-> Bool {
+        
+        if self.index == 0 || self.index == 1 {
+            return false
+        } else {
+            return true
+        }
+        
+    }
+    
 }
 
 struct BarChartSwiftUI: UIViewRepresentable {
     let nydata: [NYTimesData]
     let index: Int
     let barChart = BarChartView()
+    let start: Int
     
     func makeUIView(context: UIViewRepresentableContext<BarChartSwiftUI>) -> BarChartView {
         setUpChart()
@@ -136,9 +162,10 @@ struct BarChartSwiftUI: UIViewRepresentable {
     func updateUIView(_ uiView: BarChartView, context: UIViewRepresentableContext<BarChartSwiftUI>) {
         if nydata.count > 0 {
             barChart.noDataText = "No Data Available"
-            let dataSets = [getLineChartDataSet()]
+            let dataSets = [getLineChartDataSet(dataType: self.index)]
             let data = BarChartData(dataSets: dataSets)
             data.setValueFont(.systemFont(ofSize: 7, weight: .light))
+            barChart.animate(xAxisDuration: 2.5)
              DispatchQueue.main.async {
                 uiView.data = data
             }
@@ -158,7 +185,7 @@ struct BarChartSwiftUI: UIViewRepresentable {
         return dataPoints
     }
 
-    func getLineChartDataSet() -> BarChartDataSet {
+    func getLineChartDataSet(dataType: Int) -> BarChartDataSet {
         var sessions: [Double] = []
         var accuracy: [Double] = []
         let formatter = DateFormatter()
@@ -168,28 +195,40 @@ struct BarChartSwiftUI: UIViewRepresentable {
         let dayFormatter = DateFormatter()
         dayFormatter.dateFormat = "dd"
             
-        for i in 0...nydata.count - 1 {
+        for i in start...nydata.count - 1 {
+            
             sessions.append(Double(i))
-            if self.index == 0 {
+            
+            if dataType == 0 {
                 accuracy.append(Double(nydata[i].cases))
-            } else if self.index == 1 {
+            } else if dataType == 1 {
                 accuracy.append(Double(nydata[i].deaths))
-            } else if self.index == 2 {
+            } else if dataType == 2 {
                 accuracy.append(Double(nydata[i].newCases))
             } else {
                 accuracy.append(Double(nydata[i].newDeaths))
             }
+
         }
+        
+        var str = ""
+        
+        switch self.index {
+        case 0:
+            str = "Cases"
+        case 1:
+            str = "Deaths"
+        case 2:
+            str = "New Cases"
+        case 3:
+                str = "New Deaths"
+        default:
+            str = ""
+        }
+        
         let dataPoints = getChartDataPoints(sessions:sessions, accuracy: accuracy)
-        let set = BarChartDataSet(entries: dataPoints, label: self.index == 0 ? "Cases" : "Deaths")
-/*
-        set.lineWidth = 2.5
-        set.circleRadius = 4
-        set.circleHoleRadius = 2
-        let color = ChartColorTemplates.vordiplom()[0]
-        set.setColor(color)
-        set.setCircleColor(color)
-*/
+        let set = BarChartDataSet(entries: dataPoints, label: str)
+
         return set
     }
     
@@ -199,6 +238,7 @@ struct LineChartSwiftUI: UIViewRepresentable {
     let nydata: [NYTimesData]
     let index: Int
     let lineChart = LineChartView()
+    let start: Int
 
     func makeUIView(context: UIViewRepresentableContext<LineChartSwiftUI>) -> LineChartView {
         setUpChart()
@@ -207,10 +247,21 @@ struct LineChartSwiftUI: UIViewRepresentable {
 
     func updateUIView(_ uiView: LineChartView, context: UIViewRepresentableContext<LineChartSwiftUI>) {
         if nydata.count > 0 {
+            print(nydata.count)
             lineChart.noDataText = "No Data Available"
-            let dataSets = [getLineChartDataSet()]
-            let data = LineChartData(dataSets: dataSets)
+            
+            var data: ChartData
+            var dataSets: [LineChartDataSet]
+            if self.index < 4 {
+                dataSets = [getLineChartDataSet(dataType: self.index)]
+            } else if self.index == 4 {
+                dataSets = [getLineChartDataSet(dataType: 4), getLineChartDataSet(dataType: 5)]
+            } else {
+                dataSets = [getLineChartDataSet(dataType: 6), getLineChartDataSet(dataType: 7)]
+            }
+            data = LineChartData(dataSets: dataSets)
             data.setValueFont(.systemFont(ofSize: 7, weight: .light))
+            self.lineChart.animate(xAxisDuration: 2.5)
              DispatchQueue.main.async {
                 uiView.data = data
             }
@@ -218,23 +269,8 @@ struct LineChartSwiftUI: UIViewRepresentable {
     }
 
     func setUpChart() {
-
         lineChart.noDataText = "Waiting for data"
-//        let dataSets = [getLineChartDataSet()]
-//        let data = LineChartData(dataSets: dataSets)
-//        data.setValueFont(.systemFont(ofSize: 7, weight: .light))
-//        lineChart.data = data
-
     }
-/*
-    func getChartDataPoints(sessions: [Int], accuracy: [Double]) -> [ChartDataEntry] {
-        var dataPoints: [ChartDataEntry] = []
-        for count in (0..<sessions.count) {
-            dataPoints.append(ChartDataEntry.init(x: Double(sessions[count]), y: accuracy[count]))
-        }
-        return dataPoints
-    }
-*/
     
     func getChartDataPoints(sessions: [Double], accuracy: [Double]) -> [ChartDataEntry] {
         var dataPoints: [ChartDataEntry] = []
@@ -244,7 +280,7 @@ struct LineChartSwiftUI: UIViewRepresentable {
         return dataPoints
     }
 
-    func getLineChartDataSet() -> LineChartDataSet {
+    func getLineChartDataSet(dataType: Int) -> LineChartDataSet {
 //        var sessions: [Int] = []
         var sessions: [Double] = []
         var accuracy: [Double] = []
@@ -255,34 +291,54 @@ struct LineChartSwiftUI: UIViewRepresentable {
         let dayFormatter = DateFormatter()
         dayFormatter.dateFormat = "dd"
         
-        for i in 0...nydata.count - 1 {
-/*
-            let timeIntervalForDate: TimeInterval = formatter.date(from: nydata[i].date)!.timeIntervalSince1970
-            let monthString = monthFormatter.string(from: formatter.date(from: nydata[i].date)!)
-            if let dayInt = Int(dayFormatter.string(from: formatter.date(from: nydata[i].date)!)) {
-                sessions.append(dayInt)
-            }
-*/
+        for i in start...nydata.count - 1 {
+
             sessions.append(Double(i))
-            if self.index == 0 {
+            
+            switch dataType {
+            case 0, 4:
                 accuracy.append(Double(nydata[i].cases))
-            } else if self.index == 1 {
+            case 1, 5:
                 accuracy.append(Double(nydata[i].deaths))
-            } else if self.index == 2 {
+            case 2, 6:
                 accuracy.append(Double(nydata[i].newCases))
-            } else {
+            case 3, 7:
                 accuracy.append(Double(nydata[i].newDeaths))
+            default:
+                accuracy.append(Double(nydata[i].cases))
             }
         }
+        
         let dataPoints = getChartDataPoints(sessions:sessions, accuracy: accuracy)
-        let set = LineChartDataSet(entries: dataPoints, label: self.index == 0 ? "Cases" : "Deaths")
-    
-        set.lineWidth = 2.5
-        set.circleRadius = 4
-        set.circleHoleRadius = 2
-        let color = ChartColorTemplates.vordiplom()[0]
-        set.setColor(color)
-        set.setCircleColor(color)
+        
+        var str = ""
+        
+        switch dataType {
+        case 0, 4:
+            str = "Cases"
+        case 1, 5:
+            str = "Deaths"
+        case 2, 6:
+            str = "New Cases"
+        case 3, 7:
+            str = "New Deaths"
+        default:
+            str = ""
+        }
+        
+        let set = LineChartDataSet(entries: dataPoints, label: str)
+
+        set.lineWidth = 2
+        set.circleRadius = 3
+        
+        if dataType == 5 || dataType == 7 {
+            set.setColor(.red)
+            set.setCircleColor(.blue)
+        }
+        else {
+            set.setColor(.yellow)
+            set.setCircleColor(.black)
+        }
         
         return set
     }
