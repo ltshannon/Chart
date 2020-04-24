@@ -20,13 +20,13 @@
 		469B7370244FB21A00395E77 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469B7368244FB21A00395E77 /* Color.swift */; };
 		469B7371244FB21A00395E77 /* PieChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469B736A244FB21A00395E77 /* PieChart.swift */; };
 		469B7372244FB21A00395E77 /* PieChartSlide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469B736B244FB21A00395E77 /* PieChartSlide.swift */; };
+		469B7377245394C700395E77 /* countries.json in Resources */ = {isa = PBXBuildFile; fileRef = 469B7376245394C700395E77 /* countries.json */; };
 		46B76E6D2446644D00991641 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B76E6C2446644D00991641 /* AppDelegate.swift */; };
 		46B76E6F2446644D00991641 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B76E6E2446644D00991641 /* SceneDelegate.swift */; };
 		46B76E712446644D00991641 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B76E702446644D00991641 /* ContentView.swift */; };
 		46B76E732446645000991641 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46B76E722446645000991641 /* Assets.xcassets */; };
 		46B76E762446645000991641 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46B76E752446645000991641 /* Preview Assets.xcassets */; };
 		46B76E792446645000991641 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46B76E772446645000991641 /* LaunchScreen.storyboard */; };
-		46B76E8C2447AB6000991641 /* countries.json in Resources */ = {isa = PBXBuildFile; fileRef = 46B76E8B2447AB6000991641 /* countries.json */; };
 		46B76E8E2447E51000991641 /* VirusTrackingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B76E8D2447E51000991641 /* VirusTrackingViewModel.swift */; };
 		46B76E902447E5B500991641 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B76E8F2447E5B500991641 /* ChartView.swift */; };
 		46B76E922447E64000991641 /* CountriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B76E912447E64000991641 /* CountriesView.swift */; };
@@ -45,6 +45,7 @@
 		469B7368244FB21A00395E77 /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		469B736A244FB21A00395E77 /* PieChart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieChart.swift; sourceTree = "<group>"; };
 		469B736B244FB21A00395E77 /* PieChartSlide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieChartSlide.swift; sourceTree = "<group>"; };
+		469B7376245394C700395E77 /* countries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = countries.json; path = "country-flags-master/countries.json"; sourceTree = SOURCE_ROOT; };
 		46B76E692446644D00991641 /* Corona CA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Corona CA.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		46B76E6C2446644D00991641 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		46B76E6E2446644D00991641 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,7 +54,6 @@
 		46B76E752446645000991641 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		46B76E782446645000991641 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		46B76E7A2446645000991641 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		46B76E8B2447AB6000991641 /* countries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = countries.json; path = "../../country-flags-master/countries.json"; sourceTree = "<group>"; };
 		46B76E8D2447E51000991641 /* VirusTrackingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirusTrackingViewModel.swift; sourceTree = "<group>"; };
 		46B76E8F2447E5B500991641 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		46B76E912447E64000991641 /* CountriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountriesView.swift; sourceTree = "<group>"; };
@@ -130,6 +130,7 @@
 		46B76E6B2446644D00991641 /* Chart */ = {
 			isa = PBXGroup;
 			children = (
+				469B7376245394C700395E77 /* countries.json */,
 				46B76E6C2446644D00991641 /* AppDelegate.swift */,
 				46B76E6E2446644D00991641 /* SceneDelegate.swift */,
 				46B76E702446644D00991641 /* ContentView.swift */,
@@ -144,7 +145,6 @@
 				46B76E722446645000991641 /* Assets.xcassets */,
 				46B76E772446645000991641 /* LaunchScreen.storyboard */,
 				46B76E7A2446645000991641 /* Info.plist */,
-				46B76E8B2447AB6000991641 /* countries.json */,
 				46B76E742446645000991641 /* Preview Content */,
 			);
 			path = Chart;
@@ -231,7 +231,7 @@
 			files = (
 				46B76E792446645000991641 /* LaunchScreen.storyboard in Resources */,
 				46B76E762446645000991641 /* Preview Assets.xcassets in Resources */,
-				46B76E8C2447AB6000991641 /* countries.json in Resources */,
+				469B7377245394C700395E77 /* countries.json in Resources */,
 				46B76E732446645000991641 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

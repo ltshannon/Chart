@@ -221,7 +221,7 @@ struct BarChartSwiftUI: UIViewRepresentable {
         case 2:
             str = "New Cases"
         case 3:
-                str = "New Deaths"
+            str = "New Deaths"
         default:
             str = ""
         }

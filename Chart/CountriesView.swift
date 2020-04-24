@@ -13,6 +13,9 @@ struct CountriesView: View {
     
     var body: some View {
         VStack {
+            HStack {
+                Text("Cases: \(model.totalCases) Deaths: \(model.totalDeaths)")
+            }
             List {
                 ForEach(self.model.countryArray, id: \.self) { country in
                     NavigationLink(destination: CountriesViewDetail(model: self.model, name: country)) {
@@ -33,7 +36,7 @@ struct CountriesView: View {
                 }
             }
         }
-            .navigationBarTitle(Text("World Cases: \(model.totalCases) Deaths: \(model.totalDeaths)"), displayMode: .inline)
+            .navigationBarTitle(Text("Countries"), displayMode: .inline)
     }
     
     func getFlag(model: VirusTrackerViewModel, country: String)-> String {

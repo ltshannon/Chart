@@ -788,19 +788,40 @@ struct CovidData: Decodable, Hashable {
 }
 
 struct GlobalStatisticsFields: Decodable, Hashable {
-    let total_cases: Int?
-    let total_recovered: Int?
-    let total_unresolved: Int?
-    let total_deaths: Int?
-    let total_new_cases_today: Int?
-    let total_new_deaths_today: Int?
-    let total_active_cases: Int?
-    let total_serious_cases: Int?
-    let total_affected_countries: Int?
+    let total_cases: Int
+    let total_recovered: Int
+    let total_unresolved: Int
+    let total_deaths: Int
+    let total_new_cases_today: Int
+    let total_new_deaths_today: Int
+    let total_active_cases: Int
+    let total_serious_cases: Int
+    let total_affected_countries: Int
+    
+    init(cases: Int, recovered: Int, unresolved: Int, deaths: Int, newCases: Int, newDeaths: Int, activeCases: Int, seriousCases: Int, affectedCountries: Int) {
+    
+        self.total_cases = cases
+        self.total_recovered = recovered
+        self.total_unresolved = unresolved
+        self.total_deaths = deaths
+        self.total_new_cases_today = newCases
+        self.total_new_deaths_today = newCases
+        self.total_active_cases = activeCases
+        self.total_serious_cases = seriousCases
+        self.total_affected_countries = affectedCountries
+    }
+            
 }
 
 struct GlobalStatistics: Decodable, Hashable {
     let results: [GlobalStatisticsFields]
+/*
+    init(cases: Int, recovered: Int, unresolved: Int, deaths: Int, newCases: Int, newDeaths: Int, activeCases: Int, seriousCases: Int, affectedCountries: Int) {
+        
+        self.results =
+        [GlobalStatisticsFields(total_cases: cases, total_recovered: recovered, total_unresolved: unresolved, total_deaths: deaths, total_new_cases_today: newCases, total_new_deaths_today: newDeaths, total_active_cases: activeCases, total_serious_cases: seriousCases, total_affected_countries: affectedCountries)]
+    }
+*/
 }
 
 struct NYTimesData: Decodable, Hashable {
@@ -866,6 +887,7 @@ class VirusTrackerViewModel: ObservableObject {
     var countryMaxCases: [String : Double] = [:]
     var countiesDeathsTotals: Double = 0
     var countiesCasesTotals: Double = 0
+    var globalStats: GlobalStatisticsFields = GlobalStatisticsFields(cases: 0, recovered: 0, unresolved: 0, deaths: 0, newCases: 0, newDeaths: 0, activeCases: 0, seriousCases: 0, affectedCountries: 0)
     
     init() {
         if countries.count == 0 {
@@ -975,18 +997,13 @@ class VirusTrackerViewModel: ObservableObject {
             do {
                 let data = try JSONDecoder().decode(GlobalStatistics.self, from: data)
                 if data.results.count == 1 {
-                    var temp = 0
-                    var temp2 = 0
-                    let gobal = data.results[0]
-                    if let value = gobal.total_cases {
-                        temp = value
-                    }
-                    if let value = gobal.total_deaths {
-                        temp2 = value
-                    }
+                    let global = data.results[0]
+                    
+                    self.globalStats = GlobalStatisticsFields(cases: global.total_cases, recovered: global.total_recovered, unresolved: global.total_unresolved, deaths: global.total_deaths, newCases: global.total_new_cases_today, newDeaths: global.total_new_deaths_today, activeCases: global.total_active_cases, seriousCases: global.total_serious_cases, affectedCountries: global.total_affected_countries)
+
                     DispatchQueue.main.async {
-                        self.totalCases = temp
-                        self.totalDeaths = temp2
+                        self.totalCases = self.globalStats.total_cases
+                        self.totalDeaths = self.globalStats.total_deaths
                     }
                 }
             } catch {
