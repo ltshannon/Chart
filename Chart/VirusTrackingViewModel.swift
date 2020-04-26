@@ -805,7 +805,7 @@ struct GlobalStatisticsFields: Decodable, Hashable {
         self.total_unresolved = unresolved
         self.total_deaths = deaths
         self.total_new_cases_today = newCases
-        self.total_new_deaths_today = newCases
+        self.total_new_deaths_today = newDeaths
         self.total_active_cases = activeCases
         self.total_serious_cases = seriousCases
         self.total_affected_countries = affectedCountries
@@ -860,6 +860,18 @@ struct VirusTrackerData: Decodable, Hashable {
     }
 }
 
+struct CountryData: Decodable, Hashable {
+    let name: String
+    let cases: Int
+    let deaths: Int
+    
+    init(name: String, cases: Int, deaths: Int) {
+        self.name = name
+        self.cases = cases
+        self.deaths = deaths
+    }
+}
+
 class VirusTrackerViewModel: ObservableObject {
 //    @Published var virusTracker: VirusTrackerData = VirusTrackerData(data:[])
     @Published var virusTrackerDataSet: [NYTimesData] = []
@@ -873,12 +885,9 @@ class VirusTrackerViewModel: ObservableObject {
     var countriesSet: Set<String> = []
     var temp: [String] = []
 //    @Published var countryArray: [String] = []
-    var countryArray: [String] = []
+    var countryArray: [CountryData] = []
     var startDate: String = ""
     var endDate: String = ""
-    @Published var totalCases: Int = 0
-    @Published var totalDeaths: Int = 0
-    
     var laTimesArray: [LATimesData] = []
     var countySet: Set<String> = []
     var countyMaxDeaths: [String : Double] = [:]
@@ -887,7 +896,13 @@ class VirusTrackerViewModel: ObservableObject {
     var countryMaxCases: [String : Double] = [:]
     var countiesDeathsTotals: Double = 0
     var countiesCasesTotals: Double = 0
-    var globalStats: GlobalStatisticsFields = GlobalStatisticsFields(cases: 0, recovered: 0, unresolved: 0, deaths: 0, newCases: 0, newDeaths: 0, activeCases: 0, seriousCases: 0, affectedCountries: 0)
+    @Published var globalStats: GlobalStatisticsFields = GlobalStatisticsFields(cases: 0, recovered: 0, unresolved: 0, deaths: 0, newCases: 0, newDeaths: 0, activeCases: 0, seriousCases: 0, affectedCountries: 0)
+    @Published var countryArrow: Bool = false
+    @Published var casesArrow: Bool = false
+    @Published var newCasesArrow: Bool = false
+    @Published var deaths: Bool = false
+    @Published var deathsArrow: Bool = false
+    @Published var newDeathsArrow: Bool = false
     
     init() {
         if countries.count == 0 {
@@ -900,6 +915,7 @@ class VirusTrackerViewModel: ObservableObject {
         
         nyTimesArray.removeAll()
         countriesArray.removeAll()
+        countyArray.removeAll()
         
         let urlString = "https://thevirustracker.com/timeline/map-data.json"
     
@@ -958,7 +974,25 @@ class VirusTrackerViewModel: ObservableObject {
                 self.temp = Array(self.countriesSet)
                 self.temp.sort()
                 
-                self.countryArray = self.temp
+                for country in self.temp {
+                    var cases = 0
+                    var deaths = 0
+                    var code: String = ""
+                    for (key, value) in self.countries {
+                        if value == country {
+                            code = key
+                        }
+                    }
+                    if let c = self.countryMaxCases[code] {
+                        cases = Int(c)
+                    }
+                    if let c = self.countryMaxDeaths[code] {
+                        deaths = Int(c)
+                    }
+                    let item = CountryData(name: country, cases: cases, deaths: deaths)
+                    self.countryArray.append(item)
+                }
+//                self.countryArray = self.temp
                 
                 self.getCountryData(country: "United States", type: "Cases")
 /*
@@ -999,11 +1033,8 @@ class VirusTrackerViewModel: ObservableObject {
                 if data.results.count == 1 {
                     let global = data.results[0]
                     
-                    self.globalStats = GlobalStatisticsFields(cases: global.total_cases, recovered: global.total_recovered, unresolved: global.total_unresolved, deaths: global.total_deaths, newCases: global.total_new_cases_today, newDeaths: global.total_new_deaths_today, activeCases: global.total_active_cases, seriousCases: global.total_serious_cases, affectedCountries: global.total_affected_countries)
-
                     DispatchQueue.main.async {
-                        self.totalCases = self.globalStats.total_cases
-                        self.totalDeaths = self.globalStats.total_deaths
+                        self.globalStats = GlobalStatisticsFields(cases: global.total_cases, recovered: global.total_recovered, unresolved: global.total_unresolved, deaths: global.total_deaths, newCases: global.total_new_cases_today, newDeaths: global.total_new_deaths_today, activeCases: global.total_active_cases, seriousCases: global.total_serious_cases, affectedCountries: global.total_affected_countries)
                     }
                 }
             } catch {
@@ -1085,7 +1116,7 @@ class VirusTrackerViewModel: ObservableObject {
                     }
                             
                     let item = LATimesData(date: date, county: county, fips: fips, cases: cases, deaths:deaths, newCases: newCases, newDeaths: newDeaths)
-                        self.laTimesArray.append(item)
+                    self.laTimesArray.append(item)
 
                 }
                 
@@ -1671,6 +1702,60 @@ class VirusTrackerViewModel: ObservableObject {
         
         }.resume()
 */
+    }
+    enum SortType {
+        case country
+        case cases
+        case deaths
+        case newCases
+        case newDeaths
+    }
+    
+    func sort(sortBy: SortType) {
+        
+        switch sortBy {
+        case .country:
+            if countryArrow {
+                self.countryArray.sort{$0.name < $1.name}
+            } else {
+                self.countryArray.sort{$0.name > $1.name}
+            }
+            countryArrow.toggle()
+        case .cases:
+            if casesArrow {
+                self.countryArray.sort{$0.cases < $1.cases}
+            } else {
+                self.countryArray.sort{$0.cases > $1.cases}
+            }
+            casesArrow.toggle()
+        case .deaths:
+            if deathsArrow {
+                self.countryArray.sort{$0.deaths < $1.deaths}
+            } else {
+                self.countryArray.sort{$0.deaths > $1.deaths}
+            }
+            deathsArrow.toggle()
+        case .newCases:
+            if newCasesArrow {
+
+            }
+            else {
+
+            }
+            newCasesArrow.toggle()
+
+        case .newDeaths:
+            if newDeathsArrow {
+
+            } else {
+
+            }
+            newDeathsArrow.toggle()
+        }
+        
+        DispatchQueue.main.async {
+
+        }
     }
     
 

@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct LATimesData {
+struct LATimesData: Decodable, Hashable  {
     let date: String
     let county: String
     let fips: Int
